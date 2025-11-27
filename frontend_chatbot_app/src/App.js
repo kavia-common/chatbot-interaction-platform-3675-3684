@@ -7,6 +7,49 @@ const timeNow = () => {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
+// Normalize helper
+const normalize = (s) => s.trim().toLowerCase();
+
+// PUBLIC_INTERFACE
+export function matchIntent(text) {
+  /**
+   * PUBLIC_INTERFACE
+   * Determine a simple intent keyword based on the user's message.
+   * Returns a string key for the intent.
+   */
+  const t = normalize(text);
+
+  // Clear chat commands
+  if (/(^|\s)(clear|reset|wipe)\s+(chat|history|conversation)s?($|\s)/i.test(text)) return 'clear';
+
+  // Help / usage
+  if (/(^|\s)(help|usage|guide)(\s|$)/i.test(t) || /(how (to|do) (i|you)|what can (you|u) do)/i.test(t)) return 'help';
+
+  // Features
+  if (/(features?|capabilit(y|ies)|what.*offer|what.*can.*do)/i.test(t)) return 'features';
+
+  // About
+  if (/(^|\s)(about)(\s|$)/i.test(t) || /(who.*(are|r) you|what.*(is|are) this|tell me about)/i.test(t)) return 'about';
+
+  // Theme info
+  if (/(theme|colors?|colour|palette|style|ocean (professional)?)/i.test(t)) return 'theme';
+
+  // Small talk: how are you
+  if (/(how are you|how’s it going|hows it going|how r u|how do you do)/i.test(t)) return 'how_are_you';
+
+  // Small talk: who are you
+  if (/(who.*are you|your name|what are you)/i.test(t)) return 'who_are_you';
+
+  // Greetings
+  if (/(\bhi\b|\bhello\b|\bhey\b|\bgood (morning|afternoon|evening)\b)/i.test(t)) return 'greeting';
+
+  // Thanks
+  if (/(thanks|thank you|ty|thx)/i.test(t)) return 'thanks';
+
+  // Fallback
+  return 'fallback';
+}
+
 // PUBLIC_INTERFACE
 function App() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,6 +90,33 @@ function App() {
     }
   }, [messages, typing]);
 
+  const botReplyForIntent = (intent) => {
+    switch (intent) {
+      case 'greeting':
+        return `Hello! 👋 Great to see you here at ${appName}. How can I assist you today?`;
+      case 'help':
+        return "Here to help! 💡 Try:\n• 'features' to see what I can do\n• 'about' to learn about this app\n• 'theme' to view colors/style\n• 'clear chat' to reset history";
+      case 'features':
+        return "I can help with:\n• Quick tips and usage help\n• About this app and theme info\n• Small talk and friendly guidance\n• Clearing chat history\nAll right here in the chat ✨";
+      case 'about':
+        return `This is a modern React chatbot demo with the Ocean Professional theme. It uses a floating button, modal chat, and Tailwind styling—no external services needed. 🌊`;
+      case 'theme':
+        return "Ocean Professional 🌊\n• Primary: #2563EB (blue)\n• Secondary: #F59E0B (amber)\n• Surface: #ffffff • Text: #111827\nClean, modern UI with soft shadows and smooth gradients.";
+      case 'how_are_you':
+        return "I'm feeling waves of positivity today 🌊😄 How can I help you?";
+      case 'who_are_you':
+        return "I’m your Ocean Assistant—your friendly in-app guide for quick info, tips, and theme details. 🤝";
+      case 'thanks':
+        return "You're welcome! 😊 Anything else I can help with?";
+      case 'clear':
+        // Clearing handled outside switch; provide confirmation text
+        return "Chat history cleared! 🧹 Start fresh—how can I help?";
+      case 'fallback':
+      default:
+        return "I didn’t fully catch that. Try 'help', 'features', 'about', 'theme', or say 'clear chat'. 😊";
+    }
+  };
+
   // PUBLIC_INTERFACE
   const sendMessage = () => {
     const trimmed = input.trim();
@@ -57,15 +127,20 @@ function App() {
     // Simulate bot typing
     setTyping(true);
     setTimeout(() => {
-      const lower = trimmed.toLowerCase();
-      const isGreeting = /(\\bhi\\b|\\bhello\\b|\\bhey\\b)/i.test(lower);
-      const replyText = isGreeting
-        ? `Hello! 👋 Great to see you here at ${appName}. How can I assist you today?`
-        : "I’m here to help! Ask me anything, or say 'Hi' to get started.";
-      const botMsg = { id: `b_${Date.now()}`, sender: 'bot', text: replyText, time: timeNow() };
+      const intent = matchIntent(trimmed);
+
+      // Clear chat handling: reset but keep a confirmation message
+      if (intent === 'clear') {
+        const confirmMsg = { id: `b_${Date.now()}`, sender: 'bot', text: botReplyForIntent('clear'), time: timeNow() };
+        setMessages([confirmMsg]); // start fresh with confirmation
+        setTyping(false);
+        return;
+      }
+
+      const botMsg = { id: `b_${Date.now()}`, sender: 'bot', text: botReplyForIntent(intent), time: timeNow() };
       setMessages((prev) => [...prev, botMsg]);
       setTyping(false);
-    }, 650);
+    }, 550);
   };
 
   return (
