@@ -176,6 +176,36 @@ function App() {
   );
 }
 
+function ChatIcon({ className = "h-6 w-6" }) {
+  // PUBLIC_INTERFACE
+  /** Branded chatbot icon: chat bubble with bot face, crisp at 24px, retina-safe via vector SVG. */
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label="Chatbot"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <title>Chatbot</title>
+      <g fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        {/* Bubble */}
+        <path d="M5 5.8C5 4.25 6.25 3 7.8 3h8.4C17.75 3 19 4.25 19 5.8v6.4c0 1.55-1.25 2.8-2.8 2.8H11l-3.8 3.1c-.46.37-1.2.04-1.2-.54V15c-1.15 0-2-.9-2-2V5.8Z" />
+        {/* Bot head band */}
+        <path d="M8 7.75h8" />
+        {/* Eyes */}
+        <circle cx="10" cy="10.25" r="0.9" fill="currentColor" stroke="none" />
+        <circle cx="14" cy="10.25" r="0.9" fill="currentColor" stroke="none" />
+        {/* Antenna */}
+        <path d="M12 3V1.8" />
+        <circle cx="12" cy="1.4" r="0.6" fill="currentColor" stroke="none" />
+        {/* Smile */}
+        <path d="M10 12.3c.5.5 1.1.8 2 .8s1.5-.3 2-.8" />
+      </g>
+    </svg>
+  );
+}
+
 function ChatButton({ onClick }) {
   return (
     <button
@@ -184,10 +214,18 @@ function ChatButton({ onClick }) {
       aria-label="Open chat"
       className="fixed bottom-6 right-6 z-40 group"
     >
-      <div className="rounded-full p-4 shadow-soft bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary to-blue-600 text-white hover:scale-105 transition-transform duration-200">
-        <svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 10h8M8 14h5m8-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+      <div
+        className="
+          rounded-full p-3 shadow-soft
+          bg-primary text-white
+          hover:brightness-105 active:brightness-95
+          transition-transform duration-200 ease-out
+          hover:scale-105 focus:outline-none
+          focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-white
+          dark:focus-visible:ring-offset-gray-900
+        "
+      >
+        <ChatIcon className="h-6 w-6" />
       </div>
       <span className="absolute -top-2 -right-2 h-3 w-3 rounded-full bg-secondary animate-ping opacity-75" />
     </button>
@@ -245,14 +283,21 @@ function ChatModal({ messages, typing, input, onChangeInput, onSend, onClose, in
           <div className="flex h-full flex-col overscroll-contain">
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between px-4 py-3 bg-ocean-gradient sticky top-0 z-10">
-              <div>
-                <h2 className="text-base font-semibold text-textcolor">Ocean Assistant</h2>
-                <p className="text-xs text-textcolor/60">Ask me anything</p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white shadow-soft
+                                   ring-1 ring-black/5">
+                  <ChatIcon className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-textcolor">Ocean Assistant</h2>
+                  <p className="text-xs text-textcolor/60">Ask me anything</p>
+                </div>
               </div>
               <button
-                className="p-2 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="p-2 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
                 onClick={onClose}
                 aria-label="Close chat"
+                title="Close"
               >
                 <svg className="h-5 w-5 text-textcolor/80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path fillRule="evenodd" d="M10 8.586 3.757 2.343 2.343 3.757 8.586 10l-6.243 6.243 1.414 1.414L10 11.414l6.243 6.243 1.414-1.414L11.414 10l6.243-6.243-1.414-1.414L10 8.586z" clipRule="evenodd" />
@@ -284,7 +329,7 @@ function ChatModal({ messages, typing, input, onChangeInput, onSend, onClose, in
                 />
                 <button
                   onClick={onSend}
-                  className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white shadow-soft hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary"
+                  className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white shadow-soft hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1"
                   aria-label="Send message"
                 >
                   <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
