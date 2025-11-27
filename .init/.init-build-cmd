@@ -1,0 +1,4 @@
+{
+    "command": "npm install && npx tsc --noEmit && npm test -- --ci",
+    "working_directory": "/home/kavia/workspace/code-generation/chatbot-interaction-platform-3675-3684/frontend_chatbot_app"
+}
