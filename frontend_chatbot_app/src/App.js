@@ -229,59 +229,70 @@ function ChatModal({ messages, typing, input, onChangeInput, onSend, onClose, in
       aria-modal="true"
       aria-label="Chat dialog"
     >
+      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="absolute bottom-0 right-0 left-0 md:left-auto md:right-6 md:bottom-6 md:max-w-md">
-        <div ref={modalRef} className="mx-4 md:mx-0 rounded-2xl shadow-soft bg-surface ring-1 ring-black/5 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-ocean-gradient">
-            <div>
-              <h2 className="text-base font-semibold text-textcolor">Ocean Assistant</h2>
-              <p className="text-xs text-textcolor/60">Ask me anything</p>
-            </div>
-            <button
-              className="p-2 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary"
-              onClick={onClose}
-              aria-label="Close chat"
-            >
-              <svg className="h-5 w-5 text-textcolor/80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fillRule="evenodd" d="M10 8.586 3.757 2.343 2.343 3.757 8.586 10l-6.243 6.243 1.414 1.414L10 11.414l6.243 6.243 1.414-1.414L11.414 10l6.243-6.243-1.414-1.414L10 8.586z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Messages */}
-          <div className="max-h-96 min-h-[18rem] overflow-y-auto px-4 py-3 space-y-3 scrollbar-thin bg-surface">
-            {messages.map((m, idx) => (
-              <MessageBubble key={m.id} msg={m} refProp={idx === messages.length - 1 ? lastMsgRef : null} />
-            ))}
-            {typing && <TypingIndicator />}
-          </div>
-
-          {/* Input */}
-          <div className="border-t border-black/5 bg-surface px-3 py-3">
-            <div className="flex items-center gap-2">
-              <input
-                ref={inputRef}
-                aria-label="Type your message"
-                placeholder="Type a message..."
-                value={input}
-                onChange={(e) => onChangeInput(e.target.value)}
-                onKeyDown={onKeyDown}
-                className="flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textcolor placeholder:text-textcolor/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-              />
+      {/* Fixed bottom-right wrapper with viewport-constrained width */}
+      <div className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-[max(0.75rem,env(safe-area-inset-right))] left-4 sm:left-auto">
+        <div
+          ref={modalRef}
+          className="w-full max-w-[min(100vw-1rem,380px)] sm:max-w-[min(100vw-1rem,380px)] rounded-xl shadow-lg bg-surface ring-1 ring-black/5 overflow-hidden
+                     max-h-[min(100vh-2rem,600px)] h-[min(80vh,600px)]"
+        >
+          {/* Panel uses flex column to allow messages to grow and input to stick to bottom */}
+          <div className="flex h-full flex-col overscroll-contain">
+            {/* Header */}
+            <div className="flex shrink-0 items-center justify-between px-4 py-3 bg-ocean-gradient sticky top-0 z-10">
+              <div>
+                <h2 className="text-base font-semibold text-textcolor">Ocean Assistant</h2>
+                <p className="text-xs text-textcolor/60">Ask me anything</p>
+              </div>
               <button
-                onClick={onSend}
-                className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white shadow-soft hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary"
-                aria-label="Send message"
+                className="p-2 rounded-md hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-primary"
+                onClick={onClose}
+                aria-label="Close chat"
               >
-                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M3.4 20.4 22 12 3.4 3.6 3 10l12 2-12 2z" />
+                <svg className="h-5 w-5 text-textcolor/80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M10 8.586 3.757 2.343 2.343 3.757 8.586 10l-6.243 6.243 1.414 1.414L10 11.414l6.243 6.243 1.414-1.414L11.414 10l6.243-6.243-1.414-1.414L10 8.586z" clipRule="evenodd" />
                 </svg>
-                Send
               </button>
+            </div>
+
+            {/* Messages area: grow + scrollable, safe bottom padding to avoid input overlap */}
+            <div className="flex-1 px-4 py-3 space-y-3 overflow-y-auto scrollbar-thin bg-surface overscroll-contain pb-20 sm:pb-24">
+              {messages.map((m, idx) => (
+                <MessageBubble key={m.id} msg={m} refProp={idx === messages.length - 1 ? lastMsgRef : null} />
+              ))}
+              {typing && <TypingIndicator />}
+              {/* Safe-area spacer */}
+              <div className="h-[max(0px,env(safe-area-inset-bottom))]" />
+            </div>
+
+            {/* Input area: sticks to bottom, safe-area padding */}
+            <div className="shrink-0 border-t border-black/5 bg-surface px-3 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sticky bottom-0">
+              <div className="flex items-center gap-2">
+                <input
+                  ref={inputRef}
+                  aria-label="Type your message"
+                  placeholder="Type a message..."
+                  value={input}
+                  onChange={(e) => onChangeInput(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  className="flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textcolor placeholder:text-textcolor/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                />
+                <button
+                  onClick={onSend}
+                  className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-sm font-medium text-white shadow-soft hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary"
+                  aria-label="Send message"
+                >
+                  <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M3.4 20.4 22 12 3.4 3.6 3 10l12 2-12 2z" />
+                  </svg>
+                  Send
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -294,8 +305,8 @@ function MessageBubble({ msg, refProp }) {
   const isUser = msg.sender === 'user';
   return (
     <div ref={refProp} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-soft ${isUser ? 'bg-primary text-white rounded-br-sm' : 'bg-gray-100 text-textcolor rounded-bl-sm'}`}>
-        <p className="whitespace-pre-wrap">{msg.text}</p>
+      <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-soft break-words [overflow-wrap:anywhere] ${isUser ? 'bg-primary text-white rounded-br-sm' : 'bg-gray-100 text-textcolor rounded-bl-sm'}`}>
+        <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{msg.text}</p>
         <div className={`text-[10px] mt-1 ${isUser ? 'text-white/80' : 'text-textcolor/60'}`}>{msg.time}</div>
       </div>
     </div>

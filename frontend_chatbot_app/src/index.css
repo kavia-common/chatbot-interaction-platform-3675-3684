@@ -14,6 +14,7 @@
 
 html, body, #root {
   height: 100%;
+  overscroll-behavior: contain; /* prevent background scroll chaining when modal is open */
 }
 
 body {
